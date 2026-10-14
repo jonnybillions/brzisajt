@@ -1,12 +1,12 @@
-// Скриншоты примеров для сидов: обложка (1440×900) и внутренние страницы.
+// Snimci ekrana primera za seed: naslovna (1440×900) i unutrašnje stranice.
 //
-//   node scripts/capture-examples.mjs                 — снять реальные сайты
-//   node scripts/capture-examples.mjs --placeholders  — заглушки для недоступных
-//   node scripts/capture-examples.mjs --only=oriental — один проект
+//   node scripts/capture-examples.mjs                 — snimi prave sajtove
+//   node scripts/capture-examples.mjs --placeholders  — zamene za nedostupne
+//   node scripts/capture-examples.mjs --only=oriental — jedan projekat
 //
-// Результат: database/seeders/assets/projects/{slug}/cover.jpg, {page_type}.jpg
-// и manifest.json (фактический URL, заголовок сайта, найденные страницы).
-// Нужен Chromium: PLAYWRIGHT_BROWSERS_PATH или CHROMIUM_PATH.
+// Rezultat: database/seeders/assets/projects/{slug}/cover.jpg, {page_type}.jpg
+// i manifest.json (stvarni URL, naslov sajta, pronađene stranice).
+// Potreban je Chromium: PLAYWRIGHT_BROWSERS_PATH ili CHROMIUM_PATH.
 
 import { chromium } from 'playwright';
 import fs from 'node:fs';
@@ -27,21 +27,21 @@ const only = args.find((a) => a.startsWith('--only='))?.slice(7);
 const VIEWPORT = { width: 1440, height: 900 };
 const MAX_PER_TYPE = 3;
 
-// Ключевые слова в URL и тексте ссылки → тип страницы.
+// Ključne reči u URL-u i tekstu linka → tip stranice (engleski i transliterisani slugovi).
 const PAGE_TYPES = {
-    about: [/about/, /o-nas/, /o-kompanii/, /onas/, /компани/, /о нас/, /обо мне/, /about-us/, /studio/, /студи/],
-    services: [/services?/, /uslugi/, /услуг/, /направлен/],
-    catalog: [/catalog/, /katalog/, /menu/, /меню/, /каталог/, /products?/, /продукц/],
-    gallery: [/gallery/, /galereya/, /portfolio/, /projects?/, /галере/, /портфолио/, /проект/, /работы/, /works?/],
-    team: [/team/, /komanda/, /команд/, /people/],
-    reviews: [/reviews?/, /otzyvy/, /отзыв/, /testimonials?/],
-    blog: [/blog/, /news/, /novosti/, /новост/, /блог/, /press/, /статьи/, /journal/],
-    contacts: [/contacts?/, /kontakty/, /контакт/],
+    about: [/about/, /o-nas/, /o-kompanii/, /onas/, /about-us/, /studio/, /company/, /who-we-are/],
+    services: [/services?/, /uslugi/, /what-we-do/],
+    catalog: [/catalog/, /katalog/, /menu/, /products?/, /shop/],
+    gallery: [/gallery/, /galereya/, /portfolio/, /projects?/, /works?/, /interiors?/],
+    team: [/team/, /komanda/, /people/],
+    reviews: [/reviews?/, /otzyvy/, /testimonials?/],
+    blog: [/blog/, /news/, /novosti/, /press/, /journal/, /articles?/],
+    contacts: [/contacts?/, /kontakty/],
 };
 
 const LABELS = {
-    home: 'Главная', about: 'О компании', services: 'Услуги', catalog: 'Меню / Каталог', gallery: 'Галерея / Портфолио',
-    team: 'Команда', reviews: 'Отзывы', blog: 'Новости / Блог', contacts: 'Контакты',
+    home: 'Početna', about: 'O nama', services: 'Usluge', catalog: 'Meni / Katalog', gallery: 'Galerija / Portfolio',
+    team: 'Tim', reviews: 'Utisci klijenata', blog: 'Vesti / Blog', contacts: 'Kontakt',
 };
 
 const PALETTE = ['#6B3BFF', '#FF5A4E', '#C8F43A', '#3EC5FF'];
@@ -57,7 +57,7 @@ function executablePath() {
 }
 
 async function dismissOverlays(page) {
-    const texts = ['Принять', 'Согласен', 'Хорошо', 'Понятно', 'OK', 'Accept', 'Закрыть'];
+    const texts = ['Accept', 'Accept all', 'Agree', 'OK', 'Got it', 'Close'];
     for (const t of texts) {
         const btn = page.getByRole('button', { name: t, exact: false }).first();
         if (await btn.isVisible().catch(() => false)) {
@@ -76,17 +76,17 @@ async function shoot(page, url, file) {
     await page.screenshot({ path: file, type: 'jpeg', quality: 82 });
 }
 
-async function findRuVersion(page, url) {
-    const ru = await page.evaluate(() => {
-        const alt = document.querySelector('link[rel="alternate"][hreflang^="ru"]');
+async function findEnVersion(page, url) {
+    const en = await page.evaluate(() => {
+        const alt = document.querySelector('link[rel="alternate"][hreflang^="en"]');
         if (alt) return alt.href;
         const a = [...document.querySelectorAll('a[href]')].find((el) => {
             const t = el.textContent.trim().toLowerCase();
-            return (t === 'ru' || t === 'рус' || t === 'русский') || /\/ru\/?$/.test(el.getAttribute('href'));
+            return (t === 'en' || t === 'eng' || t === 'english') || /\/en\/?$/.test(el.getAttribute('href'));
         });
         return a ? a.href : null;
     });
-    return ru || url;
+    return en || url;
 }
 
 function classify(links, origin) {
@@ -112,8 +112,9 @@ async function captureReal(browser, project) {
 
     await page.goto(project.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     let url = page.url();
-    if (project.prefer_ru) {
-        url = await findRuVersion(page, url);
+    // Većina sajtova nema srpsku verziju — tražimo englesku.
+    if (project.prefer_en) {
+        url = await findEnVersion(page, url);
     }
 
     await shoot(page, url, path.join(dir, 'cover.jpg'));
@@ -140,10 +141,10 @@ async function captureReal(browser, project) {
 function placeholderHtml(project, type, accent) {
     const label = LABELS[type] || '';
     const dark = accent === '#6B3BFF' || accent === '#FF5A4E';
-    return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>
-        @font-face { font-family: U; src: url('file://${root}/node_modules/@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2') format('woff2'); unicode-range: U+0400-04FF; font-weight: 100 900; }
+    return `<!doctype html><html lang="sr-Latn"><head><meta charset="utf-8"><style>
+        @font-face { font-family: U; src: url('file://${root}/node_modules/@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2') format('woff2'); unicode-range: U+0100-024F; font-weight: 100 900; }
         @font-face { font-family: U; src: url('file://${root}/node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; }
-        @font-face { font-family: M; src: url('file://${root}/node_modules/@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2') format('woff2'); unicode-range: U+0400-04FF; font-weight: 200 800; }
+        @font-face { font-family: M; src: url('file://${root}/node_modules/@fontsource-variable/manrope/files/manrope-latin-ext-wght-normal.woff2') format('woff2'); unicode-range: U+0100-024F; font-weight: 200 800; }
         @font-face { font-family: M; src: url('file://${root}/node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
         * { box-sizing: border-box; margin: 0; }
         body { width: 1440px; height: 900px; background: #F6F4EF; font-family: M; color: #121016; overflow: hidden; }
@@ -157,7 +158,7 @@ function placeholderHtml(project, type, accent) {
         .ph { position: absolute; right: 72px; top: 64px; padding: 10px 18px; border-radius: 99px; border: 2px dashed currentColor; font-weight: 800; font-size: 15px; }
     </style></head><body>
         <div class="nav"><span>${project.name}</span><span><i></i><i></i><i></i><i></i></span></div>
-        <div class="hero"><span class="ph">Заглушка — заменить скриншотом</span><h1>${project.name}</h1><p>${label}</p><div class="blob"></div><span class="tag">${new URL(project.url).hostname}</span></div>
+        <div class="hero"><span class="ph">Zamena — zameniti snimkom ekrana</span><h1>${project.name}</h1><p>${label}</p><div class="blob"></div><span class="tag">${new URL(project.url).hostname}</span></div>
     </body></html>`;
 }
 
@@ -166,7 +167,7 @@ async function capturePlaceholder(browser, project, index) {
     fs.mkdirSync(dir, { recursive: true });
     const page = await browser.newPage({ viewport: VIEWPORT });
     const types = Object.keys(PAGE_TYPES);
-    // Распределяем типы страниц так, чтобы у каждого было по 3 шаблона.
+    // Raspoređujemo tipove stranica tako da svaki ima po 3 šablona.
     const pageTypes = types.filter((_, t) => (t + index) % projects.length < MAX_PER_TYPE);
     const accent = PALETTE[index % PALETTE.length];
 
@@ -195,10 +196,10 @@ for (const [index, project] of projects.entries()) {
         manifest[project.slug] = placeholders
             ? await capturePlaceholder(browser, project, index)
             : await captureReal(browser, project);
-        console.log(placeholders ? 'заглушка' : `ok (${Object.keys(manifest[project.slug].pages).join(', ') || 'только обложка'})`);
+        console.log(placeholders ? 'zamena' : `ok (${Object.keys(manifest[project.slug].pages).join(', ') || 'samo naslovna'})`);
     } catch (e) {
         failed.push(project.slug);
-        console.log(`недоступен: ${e.message.split('\n')[0]}`);
+        console.log(`nedostupan: ${e.message.split('\n')[0]}`);
     }
 }
 
@@ -206,5 +207,5 @@ await browser.close();
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4) + '\n');
 
 if (failed.length) {
-    console.log(`\nНе удалось снять: ${failed.join(', ')}. Запустите с --placeholders, чтобы создать заглушки.`);
+    console.log(`\nNije uspelo snimanje: ${failed.join(', ')}. Pokrenite sa --placeholders da napravite zamene.`);
 }

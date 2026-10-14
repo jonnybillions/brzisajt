@@ -1,10 +1,9 @@
 [
-    { "slug": "reg-clean", "name": "Региональный Клининговый Оператор", "url": "https://reg-clean.ru/", "industry": "business" },
-    { "slug": "magna-group", "name": "MAGNA GROUP", "url": "https://magna-group.ru/", "industry": "business" },
-    { "slug": "dugalak", "name": "Дугалак", "url": "https://dugalak.moscow/", "industry": "business" },
-    { "slug": "le-decor", "name": "Le-Decor", "url": "https://le-decor.com/", "industry": "architecture", "prefer_ru": true },
-    { "slug": "anza", "name": "ANZA — Анастасия Землянская", "url": "https://zemlyanskaya.com/", "industry": "architecture", "prefer_ru": true },
-    { "slug": "anna-rudakova", "name": "Анна Рудакова", "url": "https://annarudakova.com/", "industry": "architecture" },
-    { "slug": "oriental", "name": "Oriental", "url": "https://orientalbar.ru/", "industry": "restaurants" },
-    { "slug": "novikovvm", "name": "новиковвм.рф", "url": "http://www.xn--b1aaawkobid.xn--p1ai/", "industry": "personal" }
+    { "slug": "reg-clean", "name": "Regionalni operater čišćenja (Reg Clean)", "url": "https://reg-clean.ru/", "industry": "business", "prefer_en": true },
+    { "slug": "magna-group", "name": "MAGNA GROUP", "url": "https://magna-group.ru/", "industry": "business", "prefer_en": true },
+    { "slug": "dugalak", "name": "Dugalak", "url": "https://dugalak.moscow/", "industry": "business", "prefer_en": true },
+    { "slug": "le-decor", "name": "Le-Decor", "url": "https://le-decor.com/en", "industry": "architecture" },
+    { "slug": "anza", "name": "ANZA — Anastasia Zemlyanskaya", "url": "https://zemlyanskaya.com/en", "industry": "architecture" },
+    { "slug": "anna-rudakova", "name": "Anna Rudakova", "url": "https://annarudakova.com/", "industry": "architecture", "prefer_en": true },
+    { "slug": "oriental", "name": "Oriental", "url": "https://orientalbar.ru/", "industry": "restaurants", "prefer_en": true }
 ]

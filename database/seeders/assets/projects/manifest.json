@@ -6,7 +6,8 @@
         "pages": {
             "about": null,
             "services": null,
-            "catalog": null
+            "catalog": null,
+            "contacts": null
         },
         "placeholder": true
     },
@@ -17,6 +18,7 @@
         "pages": {
             "about": null,
             "services": null,
+            "blog": null,
             "contacts": null
         },
         "placeholder": true
@@ -27,24 +29,14 @@
         "site_name": null,
         "pages": {
             "about": null,
-            "blog": null,
-            "contacts": null
-        },
-        "placeholder": true
-    },
-    "le-decor": {
-        "url": "https://le-decor.com/",
-        "title": null,
-        "site_name": null,
-        "pages": {
             "reviews": null,
             "blog": null,
             "contacts": null
         },
         "placeholder": true
     },
-    "anza": {
-        "url": "https://zemlyanskaya.com/",
+    "le-decor": {
+        "url": "https://le-decor.com/en",
         "title": null,
         "site_name": null,
         "pages": {
@@ -54,8 +46,8 @@
         },
         "placeholder": true
     },
-    "anna-rudakova": {
-        "url": "https://annarudakova.com/",
+    "anza": {
+        "url": "https://zemlyanskaya.com/en",
         "title": null,
         "site_name": null,
         "pages": {
@@ -65,8 +57,8 @@
         },
         "placeholder": true
     },
-    "oriental": {
-        "url": "https://orientalbar.ru/",
+    "anna-rudakova": {
+        "url": "https://annarudakova.com/",
         "title": null,
         "site_name": null,
         "pages": {
@@ -76,8 +68,8 @@
         },
         "placeholder": true
     },
-    "novikovvm": {
-        "url": "http://www.xn--b1aaawkobid.xn--p1ai/",
+    "oriental": {
+        "url": "https://orientalbar.ru/",
         "title": null,
         "site_name": null,
         "pages": {
