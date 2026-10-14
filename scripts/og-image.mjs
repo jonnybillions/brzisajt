@@ -1,7 +1,7 @@
-// Генерирует public/og.png (1200×630) — превью для соцсетей и мессенджеров.
-//   npm run og            — с базовой ценой 60 000 ₽
-//   npm run og -- 65000   — если цена в админке изменилась
-// Нужен Chromium: PLAYWRIGHT_BROWSERS_PATH или CHROMIUM_PATH.
+// Generiše public/og.png (1200×630) — pregled za društvene mreže i mesindžere.
+//   npm run og            — sa osnovnom cenom 600 €
+//   npm run og -- 650     — ako je cena promenjena u admin panelu
+// Potreban je Chromium: PLAYWRIGHT_BROWSERS_PATH ili CHROMIUM_PATH.
 
 import { chromium } from 'playwright';
 import fs from 'node:fs';
@@ -10,13 +10,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const price = Number(process.argv[2] || 60000).toLocaleString('ru-RU').replace(/\s/g, ' ');
+const price = String(Number(process.argv[2] || 600)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const font = (pkg, subset) => `file://${root}/node_modules/@fontsource-variable/${pkg}/files/${pkg}-${subset}-wght-normal.woff2`;
 
-const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>
-@font-face { font-family: U; src: url('${font('unbounded', 'cyrillic')}'); unicode-range: U+0400-04FF; font-weight: 100 900; }
+const html = `<!doctype html><html lang="sr-Latn"><head><meta charset="utf-8"><style>
+@font-face { font-family: U; src: url('${font('unbounded', 'latin-ext')}'); unicode-range: U+0100-024F; font-weight: 100 900; }
 @font-face { font-family: U; src: url('${font('unbounded', 'latin')}'); font-weight: 100 900; }
-@font-face { font-family: M; src: url('${font('manrope', 'cyrillic')}'); unicode-range: U+0400-04FF; font-weight: 200 800; }
+@font-face { font-family: M; src: url('${font('manrope', 'latin-ext')}'); unicode-range: U+0100-024F; font-weight: 200 800; }
 @font-face { font-family: M; src: url('${font('manrope', 'latin')}'); font-weight: 200 800; }
 * { margin: 0; box-sizing: border-box; }
 body { width: 1200px; height: 630px; background: #F6F4EF; color: #121016; font-family: M; position: relative; overflow: hidden; }
@@ -32,9 +32,9 @@ h1 { margin-top: auto; font-family: U; font-weight: 800; font-size: 76px; line-h
   display: grid; place-items: center; text-align: center; font-family: U; font-weight: 800; font-size: 17px; line-height: 1.1; transform: rotate(12deg); }
 .url { position: absolute; left: 72px; bottom: 30px; font-weight: 700; font-size: 18px; opacity: .6; }
 </style></head><body><div class="blob"></div><div class="wrap">
-<div class="mark"><b>быстро</b>сайт<small>by otlr</small></div>
-<h1>Сайт агентского уровня.<br><span class="lime">За 7 дней.</span><br>За <span class="v">${price}&nbsp;₽</span>.</h1>
-</div><div class="sticker">Не<br>конструктор!</div><div class="url">otlr.digital</div></body></html>`;
+<div class="mark"><b>brzi</b>sajt<small>by otlr</small></div>
+<h1>Sajt agencijskog nivoa.<br><span class="lime">Za 7 dana.</span><br>Za <span class="v">${price}&nbsp;€</span>.</h1>
+</div><div class="sticker">Nije<br>konstruktor!</div><div class="url">otlr.digital</div></body></html>`;
 
 function executablePath() {
     if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
@@ -54,4 +54,4 @@ await page.evaluate(() => document.fonts.ready);
 await page.screenshot({ path: path.join(root, 'public/og.png') });
 await browser.close();
 fs.rmSync(tmp);
-console.log('public/og.png готов');
+console.log('public/og.png je spreman');
