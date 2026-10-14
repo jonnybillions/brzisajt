@@ -1,0 +1,324 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+
+/* Rezervni fontovi sa metrikom Unbounded / Manrope: dok se veb-fontovi učitavaju,
+   tekst zauzima isto mesto — bez pomeranja sadržaja (CLS).
+   Vrednosti su izračunate na srpskom tekstu u odnosu na Arial. */
+@font-face {
+    font-family: 'Unbounded Fallback';
+    src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('LiberationSans-Bold'), local('Helvetica Neue Bold');
+    font-weight: 600 900;
+    size-adjust: 132.1%;
+    ascent-override: 75.3%;
+    descent-override: 18.5%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: 'Manrope Fallback';
+    src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans-Regular'), local('Helvetica Neue');
+    size-adjust: 102%;
+    ascent-override: 104.5%;
+    descent-override: 29.4%;
+    line-gap-override: 0%;
+}
+
+/* Paleta. Kontrast (WCAG AA): na lime, sky i coral — samo ink tekst;
+   na violet — beli; violet tekst — samo na svetloj pozadini,
+   na tamnoj koristimo violet-soft. */
+:root {
+    --c-base: #F6F4EF;
+    --c-paper: #FFFFFF;
+    --c-ink: #121016;
+    --c-ink-2: #1E1B24;
+    --c-violet: #6B3BFF;
+    --c-violet-soft: #A58BFF;
+    --c-coral: #FF5A4E;
+    --c-lime: #C8F43A;
+    --c-sky: #3EC5FF;
+    --c-muted: #5C5766;
+    --c-muted-dark: #B4AEBF;
+    --c-line: #E4E0D8;
+
+    --radius-card: 2rem;
+    --header-h: 4.5rem;
+}
+
+@theme {
+    --font-display: 'Unbounded Variable', 'Unbounded Fallback', system-ui, sans-serif;
+    --font-sans: 'Manrope Variable', 'Manrope Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    --color-cream: var(--c-base);
+    --color-paper: var(--c-paper);
+    --color-ink: var(--c-ink);
+    --color-ink-2: var(--c-ink-2);
+    --color-violet: var(--c-violet);
+    --color-violet-soft: var(--c-violet-soft);
+    --color-coral: var(--c-coral);
+    --color-lime: var(--c-lime);
+    --color-sky: var(--c-sky);
+    --color-muted: var(--c-muted);
+    --color-muted-dark: var(--c-muted-dark);
+    --color-line: var(--c-line);
+
+    --radius-card: var(--radius-card);
+
+    --animate-marquee: marquee 40s linear infinite;
+    --animate-blob: blob 18s ease-in-out infinite alternate;
+    --animate-wiggle: wiggle 6s ease-in-out infinite;
+
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+
+    /* Samo transform — animacija ostaje na kompozitoru, bez ponovnog crtanja zamućenja */
+    @keyframes blob {
+        0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+        50% { transform: translate3d(4%, -6%, 0) scale(1.08) rotate(25deg); }
+        100% { transform: translate3d(-5%, 4%, 0) scale(0.95) rotate(-15deg); }
+    }
+
+    @keyframes wiggle {
+        0%, 100% { transform: rotate(var(--r, -8deg)); }
+        50% { transform: rotate(calc(var(--r, -8deg) + 4deg)) scale(1.03); }
+    }
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: calc(var(--header-h) + 1rem);
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background: var(--c-base);
+        color: var(--c-ink);
+        font-family: var(--font-sans);
+        font-feature-settings: 'kern', 'liga';
+        text-rendering: optimizeLegibility;
+        overflow-x: clip;
+    }
+
+    h1, h2, h3, .font-display {
+        font-family: var(--font-display);
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        text-wrap: balance;
+    }
+
+    p { text-wrap: pretty; }
+
+    :focus-visible {
+        outline: 3px solid var(--c-violet);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+    }
+
+    .on-dark :focus-visible { outline-color: var(--c-lime); }
+
+    ::selection { background: var(--c-lime); color: var(--c-ink); }
+
+    [x-cloak] { display: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+@layer components {
+    .container-x {
+        width: 100%;
+        max-width: 75rem;
+        margin-inline: auto;
+        padding-inline: 1rem;
+    }
+    @media (min-width: 640px) { .container-x { padding-inline: 1.5rem; } }
+
+    .section {
+        padding-block: 4.5rem;
+        /* Sekcije ispod prvog ekrana se ne iscrtavaju dok se do njih ne skroluje */
+        content-visibility: auto;
+        contain-intrinsic-size: auto 900px;
+    }
+    /* Posle učitavanja (i pri prelasku na sidro) iscrtavamo sve — da sidra budu tačna */
+    .cv-off .section { content-visibility: visible; }
+    @media (min-width: 1024px) { .section { padding-block: 7rem; } }
+
+    .on-dark { background: var(--c-ink); color: var(--c-base); }
+
+    /* Zrno na tamnim sekcijama */
+    .grain { position: relative; isolation: isolate; }
+    .grain::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        opacity: 0.09;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .eyebrow {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: 0.8125rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .h-section {
+        font-size: clamp(1.7rem, 5.5vw, 3.75rem);
+        font-weight: 700;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 3.25rem;
+        padding: 0.875rem 1.75rem;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 1rem;
+        line-height: 1.2;
+        text-align: center;
+        transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .btn-primary { background: var(--c-violet); color: #fff; box-shadow: 0 10px 30px -10px rgb(107 59 255 / 0.7); }
+    .btn-primary:hover { background: #5A2BEB; }
+    .btn-lime { background: var(--c-lime); color: var(--c-ink); }
+    .btn-lime:hover { background: #D6FA62; }
+    .btn-ghost { border: 2px solid currentColor; }
+    .btn-ghost:hover { background: var(--c-ink); color: var(--c-base); border-color: var(--c-ink); }
+    .on-dark .btn-ghost:hover { background: var(--c-base); color: var(--c-ink); border-color: var(--c-base); }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        white-space: nowrap;
+    }
+
+    .sticker {
+        --r: -8deg;
+        display: inline-grid;
+        place-items: center;
+        transform: rotate(var(--r));
+        font-family: var(--font-display);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        box-shadow: 0 6px 0 0 var(--c-ink);
+        border: 3px solid var(--c-ink);
+    }
+
+    .card {
+        border-radius: var(--radius-card);
+        padding: 1.75rem;
+    }
+    @media (min-width: 1024px) { .card { padding: 2.25rem; } }
+
+    .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1);
+        transition-delay: var(--d, 0ms);
+    }
+    .reveal.is-in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+    /* Bez JS-a sve je vidljivo */
+    .no-js .reveal { opacity: 1; transform: none; }
+
+
+    /* --- Konfigurator --- */
+    .cfg-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .cfg-input {
+        display: block;
+        width: 100%;
+        min-height: 3.25rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--c-ink);
+        border-radius: 1rem;
+        background: var(--c-paper);
+        color: var(--c-ink);
+        font-size: 1rem;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .cfg-input::placeholder { color: #8A8494; }
+    .cfg-input:focus { outline: none; box-shadow: 0 0 0 4px rgb(107 59 255 / 0.35); border-color: var(--c-violet); }
+    .cfg-input[aria-invalid='true'] { border-color: #B42318; }
+
+    .cfg-select {
+        appearance: none;
+        padding-right: 2.75rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23121016' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem;
+    }
+
+    .cfg-step { animation: cfg-step-in 0.45s cubic-bezier(.2,.7,.2,1); }
+    .cfg-reveal { animation: cfg-step-in 0.35s ease-out; }
+
+    @keyframes cfg-step-in {
+        from { opacity: 0; transform: translateX(24px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    /* Živi pregled: nivo animacije zadaje klasa pv-minimal / pv-smooth / pv-expressive */
+    .pv * { transition: background-color 0.4s ease, width 0.4s ease; }
+    .pv-minimal [class*='pv-'] { animation: none !important; }
+
+    .pv-smooth .pv-float { animation: pv-float 5s ease-in-out infinite; }
+    .pv-smooth .pv-rise { animation: pv-rise 3.6s ease-in-out infinite; }
+    .pv-smooth .pv-pulse { animation: pv-pulse 3s ease-in-out infinite; }
+    .pv-smooth .pv-dot { animation: pv-dot 3s ease-in-out infinite; }
+    .pv-smooth .pv-nudge { animation: pv-nudge 3s ease-in-out infinite; }
+    .pv-smooth .pv-progress { animation: pv-progress 6s linear infinite; }
+
+    .pv-expressive .pv-float { animation: pv-float 1.8s cubic-bezier(.5,-0.5,.5,1.5) infinite; }
+    .pv-expressive .pv-rise { animation: pv-pop 1.6s cubic-bezier(.3,1.6,.5,1) infinite; }
+    .pv-expressive .pv-pulse { animation: pv-pulse 1s ease-in-out infinite; }
+    .pv-expressive .pv-dot { animation: pv-dot 1.2s ease-in-out infinite; }
+    .pv-expressive .pv-nudge { animation: pv-nudge 1s cubic-bezier(.5,-0.5,.5,1.5) infinite; }
+    .pv-expressive .pv-progress { animation: pv-progress 2.5s linear infinite; }
+    .pv-expressive .pv-hero { animation: pv-hero 4s ease-in-out infinite; }
+
+    @keyframes pv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18%); } }
+    @keyframes pv-rise { 0%, 100% { opacity: 1; transform: none; } 50% { opacity: .55; transform: translateY(2px); } }
+    @keyframes pv-pop { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.12) translateY(-2px); } }
+    @keyframes pv-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    @keyframes pv-dot { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    @keyframes pv-nudge { 0%, 100% { transform: translate(0, -50%); } 50% { transform: translate(6px, -50%); } }
+    @keyframes pv-progress { from { width: 0; } to { width: 100%; } }
+    @keyframes pv-hero { 0%, 100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(25deg); } }
+
+    .prose-legal h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; }
+    .prose-legal p { margin: 0 0 1rem; line-height: 1.7; }
+}

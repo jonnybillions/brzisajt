@@ -1,0 +1,90 @@
+{
+    "reg-clean": {
+        "url": "https://reg-clean.ru/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "about": null,
+            "services": null,
+            "catalog": null
+        },
+        "placeholder": true
+    },
+    "magna-group": {
+        "url": "https://magna-group.ru/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "about": null,
+            "services": null,
+            "contacts": null
+        },
+        "placeholder": true
+    },
+    "dugalak": {
+        "url": "https://dugalak.moscow/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "about": null,
+            "blog": null,
+            "contacts": null
+        },
+        "placeholder": true
+    },
+    "le-decor": {
+        "url": "https://le-decor.com/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "reviews": null,
+            "blog": null,
+            "contacts": null
+        },
+        "placeholder": true
+    },
+    "anza": {
+        "url": "https://zemlyanskaya.com/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "team": null,
+            "reviews": null,
+            "blog": null
+        },
+        "placeholder": true
+    },
+    "anna-rudakova": {
+        "url": "https://annarudakova.com/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "gallery": null,
+            "team": null,
+            "reviews": null
+        },
+        "placeholder": true
+    },
+    "oriental": {
+        "url": "https://orientalbar.ru/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "catalog": null,
+            "gallery": null,
+            "team": null
+        },
+        "placeholder": true
+    },
+    "novikovvm": {
+        "url": "http://www.xn--b1aaawkobid.xn--p1ai/",
+        "title": null,
+        "site_name": null,
+        "pages": {
+            "services": null,
+            "catalog": null,
+            "gallery": null
+        },
+        "placeholder": true
+    }
+}
