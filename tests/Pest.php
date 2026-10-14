@@ -10,7 +10,7 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
-/** Валидные ответы на все шаги конфигуратора. */
+/** Ispravni odgovori na sve korake konfiguratora. */
 function validOrder(array $overrides = []): array
 {
     return array_merge([
@@ -28,15 +28,15 @@ function validOrder(array $overrides = []): array
         'images' => 'stock',
         'logo' => 'have',
         'seo' => false,
-        'name' => 'Анна',
-        'phone' => '+7 999 123-45-67',
-        'email' => 'anna@example.com',
-        'channel' => 'telegram',
+        'name' => 'Ana',
+        'phone' => '+381 63 123 4567',
+        'email' => 'ana@example.rs',
+        'channel' => 'viber',
         'consent' => true,
     ], $overrides);
 }
 
-/** Конфигуратор с заполненной формой; время «прошло» — таймер антиспама не мешает. */
+/** Konfigurator sa popunjenom formom; vreme je „prošlo“ — antispam tajmer ne smeta. */
 function filledConfigurator(array $overrides = [], array $params = []): Testable
 {
     $component = Livewire::test(Configurator::class, $params);

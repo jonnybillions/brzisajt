@@ -32,15 +32,50 @@ it('outputs meta tags and structured data', function () {
     $graph = collect(json_decode($m[1], true)['@graph'])->keyBy('@type');
 
     expect($graph->keys()->all())->toEqualCanonicalizing(['Organization', 'Service', 'FAQPage'])
-        ->and($graph['Service']['offers'])->toMatchArray(['price' => '60000', 'priceCurrency' => 'RUB'])
+        ->and($graph['Service']['offers'])->toMatchArray(['price' => '600', 'priceCurrency' => 'EUR'])
         ->and($graph['FAQPage']['mainEntity'])->toHaveCount(10);
 });
 
-it('loads Yandex Metrica only when an ID is set', function () {
-    $this->get('/')->assertDontSee('mc.yandex.ru');
+it('loads no analytics by default', function () {
+    $this->get('/')
+        ->assertDontSee('plausible.io', false)
+        ->assertDontSee('googletagmanager', false)
+        ->assertDontSee('cookieConsent', false)
+        ->assertDontSee(__('site.footer.cookies'));
+});
 
-    settings()->put(['yandex_metrica_id' => '12345678']);
-    $this->get('/')->assertSee('mc.yandex.ru/metrika/tag.js', false)->assertSee('ym(12345678', false);
+it('loads Plausible without a cookie banner', function () {
+    settings()->put(['analytics_driver' => 'plausible', 'plausible_domain' => 'brzisajt.rs']);
+
+    $this->get('/')
+        ->assertSee('data-domain="brzisajt.rs"', false)
+        ->assertSee('https://plausible.io/js/script.js', false)
+        ->assertDontSee('cookieConsent', false);
+});
+
+it('needs a domain before Plausible is enabled', function () {
+    settings()->put(['analytics_driver' => 'plausible']);
+
+    $this->get('/')->assertDontSee('plausible.io', false);
+});
+
+it('puts GA4 behind the consent banner', function () {
+    settings()->put(['analytics_driver' => 'ga4', 'ga4_id' => 'G-ABC1234']);
+
+    $html = $this->get('/')
+        ->assertSee("cookieConsent('G-ABC1234')", false)
+        ->assertSee(__('site.consent.accept'))
+        ->assertSee(__('site.footer.cookies'))
+        ->getContent();
+
+    // Google se učitava iz JavaScripta tek posle pristanka — ne iz HTML-a.
+    expect($html)->not->toContain('googletagmanager.com/gtag/js');
+});
+
+it('ignores an invalid GA4 measurement ID', function () {
+    settings()->put(['analytics_driver' => 'ga4', 'ga4_id' => 'UA-123"><script>']);
+
+    $this->get('/')->assertDontSee('cookieConsent', false)->assertDontSee('UA-123', false);
 });
 
 it('does not reference third-party CDNs on the public site', function () {
@@ -51,5 +86,24 @@ it('does not reference third-party CDNs on the public site', function () {
         ->not->toContain('cdn.jsdelivr.net')
         ->not->toContain('unpkg.com')
         ->not->toContain('recaptcha')
-        ->not->toContain('cloudflare');
+        ->not->toContain('challenges.cloudflare.com');
+});
+
+it('has no references to other language versions in the codebase', function () {
+    $dirs = ['app', 'config', 'lang', 'resources/views', 'resources/js', 'resources/css', 'routes', 'database/seeders', 'scripts'];
+    $hits = [];
+
+    foreach ($dirs as $dir) {
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path($dir), FilesystemIterator::SKIP_DOTS)) as $file) {
+            if (! $file->isFile() || ! in_array($file->getExtension(), ['php', 'js', 'mjs', 'css', 'json', 'sh'], true)) {
+                continue;
+            }
+            $text = file_get_contents($file->getPathname());
+            if (preg_match('/[\x{0400}-\x{04FF}]|₽|bystro|yandex|metrica/iu', $text)) {
+                $hits[] = str_replace(base_path().'/', '', $file->getPathname());
+            }
+        }
+    }
+
+    expect($hits)->toBe([]);
 });

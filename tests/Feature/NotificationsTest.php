@@ -22,10 +22,10 @@ it('queues the team email with a readable summary', function () {
         $html = $mail->render();
 
         return $mail->hasTo('filip@otlr.digital')
-            && $mail->hasReplyTo('anna@example.com')
-            && $mail->envelope()->subject === 'Новая заявка BS-0001 — Анна'
-            && str_contains($html, 'Многостраничный')
-            && str_contains($html, 'Главная, О компании, Услуги, Контакты')
+            && $mail->hasReplyTo('ana@example.rs')
+            && $mail->envelope()->subject === 'Novi upit BS-0001 — Ana'
+            && str_contains($html, 'Višestranični')
+            && str_contains($html, 'Početna, O nama, Usluge, Kontakt')
             && str_contains($html, '/admin/orders/'.Order::sole()->id);
     });
 });
@@ -42,9 +42,9 @@ it('sends the client confirmation when an email is given', function () {
     filledConfigurator()->call('submit');
 
     Mail::assertQueued(ClientOrderMail::class, function (ClientOrderMail $mail) {
-        return $mail->hasTo('anna@example.com')
-            && $mail->envelope()->subject === 'Мы получили вашу заявку BS-0001 — Быстросайт'
-            && str_contains($mail->render(), 'Здравствуйте, Анна!');
+        return $mail->hasTo('ana@example.rs')
+            && $mail->envelope()->subject === 'Primili smo vaš upit BS-0001 — Brzisajt'
+            && str_contains($mail->render(), 'Zdravo, Ana!');
     });
 });
 
@@ -77,7 +77,7 @@ it('posts the order to the Telegram Bot API', function () {
     Http::fake(['api.telegram.org/*' => Http::response(['ok' => true])]);
 
     $order = Order::unguarded(fn () => Order::create([
-        'name' => 'Анна <b>', 'phone' => '+7 999', 'config' => [], 'extras' => ['logo'], 'consent_at' => now(),
+        'name' => 'Ana <b>', 'phone' => '+381 63', 'config' => [], 'extras' => ['logo'], 'consent_at' => now(),
     ]));
 
     (new SendTelegramNotification($order->refresh()))->handle();
@@ -85,5 +85,5 @@ it('posts the order to the Telegram Bot API', function () {
     Http::assertSent(fn ($request) => $request->url() === 'https://api.telegram.org/bot123:abc/sendMessage'
         && $request['chat_id'] === '-100500'
         && str_contains($request['text'], 'BS-0001')
-        && str_contains($request['text'], 'Анна &lt;b&gt;'));
+        && str_contains($request['text'], 'Ana &lt;b&gt;'));
 });

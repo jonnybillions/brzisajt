@@ -163,7 +163,7 @@ class Configurator extends Component
         $ip = request()->ip();
 
         if ($this->website !== '') {
-            Log::info('Bystrosite: honeypot triggered', ['ip' => $ip]);
+            Log::info('Brzisajt: honeypot triggered', ['ip' => $ip]);
             $this->addError('submit', __('cfg.errors.generic'));
 
             return;

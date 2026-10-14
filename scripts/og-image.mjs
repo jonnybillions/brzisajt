@@ -45,7 +45,7 @@ function executablePath() {
     return undefined;
 }
 
-const tmp = path.join(os.tmpdir(), 'bystrosite-og.html');
+const tmp = path.join(os.tmpdir(), 'brzisajt-og.html');
 fs.writeFileSync(tmp, html);
 const browser = await chromium.launch({ executablePath: executablePath() });
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });

@@ -25,12 +25,12 @@ function orderWithFile(): Order
 {
     Storage::fake('orders');
     $order = Order::unguarded(fn () => Order::create([
-        'name' => 'Анна', 'email' => 'anna@example.com', 'consent_at' => now(),
+        'name' => 'Ana', 'email' => 'ana@example.rs', 'consent_at' => now(),
         'config' => ['type' => 'onepage', 'scroll' => 'slides', 'pages' => ['home', 'contacts'], 'hero' => 'video', 'motion' => 'expressive'],
         'extras' => ['seo'],
     ]));
     Storage::disk('orders')->put("{$order->id}/secret.pdf", 'PDF');
-    $order->files()->create(['path' => "{$order->id}/secret.pdf", 'original_name' => 'Бриф.pdf', 'mime' => 'application/pdf', 'size' => 3]);
+    $order->files()->create(['path' => "{$order->id}/secret.pdf", 'original_name' => 'Brif-čćšžđ.pdf', 'mime' => 'application/pdf', 'size' => 3]);
 
     return $order;
 }
@@ -55,10 +55,10 @@ it('lets admins see orders and a readable order view', function () {
     $this->get('/admin/orders')->assertOk()->assertSee('BS-0001');
     $this->get("/admin/orders/{$order->id}")
         ->assertOk()
-        ->assertSee('Одностраничный')
-        ->assertSee('Полноэкранные слайды')
-        ->assertSee('Главная, Контакты')
-        ->assertSee('Бриф.pdf')
+        ->assertSee('Jednostranični')
+        ->assertSee('Ekrani preko cele stranice')
+        ->assertSee('Početna, Kontakt')
+        ->assertSee('Brif-čćšžđ.pdf')
         ->assertDontSee('"scroll":"slides"', false);
 });
 
@@ -75,11 +75,11 @@ it('changes status and notes from the order page', function () {
 
     Livewire::test(ViewOrder::class, ['record' => $order->getRouteKey()])
         ->callAction('status', ['status' => 'contacted'])
-        ->callAction('notes', ['notes' => 'Перезвонить в пятницу']);
+        ->callAction('notes', ['notes' => 'Pozvati u petak']);
 
     expect($order->refresh())
         ->status->toBe(OrderStatus::Contacted)
-        ->notes->toBe('Перезвонить в пятницу');
+        ->notes->toBe('Pozvati u petak');
 });
 
 it('filters orders by status', function () {
@@ -97,14 +97,14 @@ it('saves settings and applies them on the site', function () {
     $this->actingAs(admin());
 
     Livewire::test(Settings::class)
-        ->fillForm(['base_price' => 70000, 'phone' => '+7 (900) 000-00-00', 'logo_svg' => '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect width="1"/></svg>'])
+        ->fillForm(['base_price' => 750, 'phone' => '+381 (11) 000-0000', 'logo_svg' => '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect width="1"/></svg>'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(settings()->int('base_price'))->toBe(70000)
+    expect(settings()->int('base_price'))->toBe(750)
         ->and(settings('logo_svg'))->not->toContain('script');
 
-    $this->get('/')->assertSee("70\u{00A0}000", false)->assertSee('+7 (900) 000-00-00');
+    $this->get('/')->assertSee("750\u{00A0}€", false)->assertSee('+381 (11) 000-0000');
 });
 
 describe('order files', function () {
@@ -114,7 +114,7 @@ describe('order files', function () {
         $this->actingAs(admin())->get(route('admin.order-files.download', $file))
             ->assertOk()
             ->assertHeader('X-Content-Type-Options', 'nosniff')
-            ->assertHeaderContains('Content-Disposition', "filename*=utf-8''".rawurlencode('Бриф.pdf'));
+            ->assertHeaderContains('Content-Disposition', "filename*=utf-8''".rawurlencode('Brif-čćšžđ.pdf'));
     });
 
     it('cannot be downloaded by guests or non-admins', function () {
@@ -161,4 +161,14 @@ it('sanitizes and measures uploaded SVG logos', function () {
     expect(Storage::disk('public')->get('logos/x.svg'))->not->toContain('script')->not->toContain('onload')
         ->and($logo->logo_width)->toBe(120)
         ->and($logo->logo_height)->toBe(40);
+});
+
+it('shows the admin panel in Serbian Latin', function () {
+    $this->actingAs(admin())->get('/admin')
+        ->assertOk()
+        ->assertSee('Nadzorna tabla')
+        ->assertSee('Upiti')
+        ->assertSee('Šabloni stranica')
+        ->assertSee('Klijenti (logotipi)')
+        ->assertSee('Podešavanja');
 });

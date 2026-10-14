@@ -172,7 +172,7 @@ async function capturePlaceholder(browser, project, index) {
     const accent = PALETTE[index % PALETTE.length];
 
     for (const type of ['home', ...pageTypes]) {
-        const tmp = path.join(os.tmpdir(), `bystro-ph-${project.slug}-${type}.html`);
+        const tmp = path.join(os.tmpdir(), `brzisajt-ph-${project.slug}-${type}.html`);
         fs.writeFileSync(tmp, placeholderHtml(project, type, accent));
         await page.goto(`file://${tmp}`, { waitUntil: 'load' });
         await page.evaluate(() => document.fonts.ready);

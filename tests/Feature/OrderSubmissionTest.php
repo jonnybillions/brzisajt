@@ -17,20 +17,20 @@ beforeEach(function () {
 });
 
 it('stores a valid order and shows the success state', function () {
-    filledConfigurator(['logo' => 'new', 'seo' => true, 'comment' => 'К весне'])
+    filledConfigurator(['logo' => 'new', 'seo' => true, 'comment' => 'Do proleća'])
         ->call('submit')
         ->assertHasNoErrors()
         ->assertSet('submitted.number', 'BS-0001')
-        ->assertSee('Заявка отправлена!')
+        ->assertSee('Upit je poslat!')
         ->assertSee('BS-0001')
         ->assertDispatched('cfg-submitted', number: 'BS-0001');
 
     $order = Order::sole();
     expect($order->number)->toBe('BS-0001')
         ->and($order->status->value)->toBe('new')
-        ->and($order->name)->toBe('Анна')
-        ->and($order->channel)->toBe('telegram')
-        ->and($order->comment)->toBe('К весне')
+        ->and($order->name)->toBe('Ana')
+        ->and($order->channel)->toBe('viber')
+        ->and($order->comment)->toBe('Do proleća')
         ->and($order->extras)->toBe(['logo', 'seo'])
         ->and($order->consent_at)->not->toBeNull()
         ->and($order->ip)->toBe('127.0.0.1')
@@ -52,19 +52,19 @@ it('numbers orders sequentially', function () {
 
 it('stores uploaded files on the private disk', function () {
     filledConfigurator()
-        ->set('newUploads', [UploadedFile::fake()->create('бриф.pdf', 200, 'application/pdf')])
+        ->set('newUploads', [UploadedFile::fake()->create('brif-čćšžđ.pdf', 200, 'application/pdf')])
         ->assertHasNoErrors()
         ->call('submit')
         ->assertHasNoErrors();
 
     $file = Order::sole()->files()->sole();
-    expect($file->original_name)->toBe('бриф.pdf');
+    expect($file->original_name)->toBe('brif-čćšžđ.pdf');
     Storage::disk('orders')->assertExists($file->path);
 });
 
 it('saves per-page template choices and the selected project style', function () {
     $project = Project::factory()->create(['slug' => 'oriental']);
-    $template = $project->pageTemplates()->create(['page_type' => 'about', 'name' => 'О нас']);
+    $template = $project->pageTemplates()->create(['page_type' => 'about', 'name' => 'O nama']);
 
     filledConfigurator(['style' => 'oriental', 'pageStyles' => ['about' => (string) $template->id, 'services' => '']])
         ->call('submit')
@@ -116,7 +116,7 @@ describe('validation', function () {
 
     it('needs a name for a custom page', function () {
         filledConfigurator(['pages' => ['home', 'custom']])->call('submit')->assertHasErrors(['form.customPage' => 'required']);
-        filledConfigurator(['pages' => ['home', 'custom'], 'customPage' => 'Акции'])->call('submit')->assertHasNoErrors();
+        filledConfigurator(['pages' => ['home', 'custom'], 'customPage' => 'Akcije'])->call('submit')->assertHasNoErrors();
     });
 
     it('requires the second language when two are chosen', function () {
@@ -195,16 +195,16 @@ describe('navigation', function () {
         $c = Livewire::test(Configurator::class)->set('form.type', 'onepage')->call('next')
             ->assertSet('step', 2)->assertSet('maxStep', 2);
 
-        $c->call('goTo', 4)->assertSet('step', 2);   // шаг ещё не открыт
+        $c->call('goTo', 4)->assertSet('step', 2);   // korak još nije otvoren
         $c->call('back')->assertSet('step', 1);
-        $c->call('goTo', 2)->assertSet('step', 2);   // пройденный — можно
+        $c->call('goTo', 2)->assertSet('step', 2);   // pređeni — može
     });
 
     it('restores a draft only up to the first invalid step', function () {
         Livewire::test(Configurator::class)
             ->call('restore', ['type' => 'multipage', 'pages' => ['about'], 'unknown' => 'x'], 4)
             ->assertSet('form.pages', ['home', 'about'])
-            ->assertSet('step', 3); // шаги 1–2 валидны, шаг 3 ещё не заполнен
+            ->assertSet('step', 3); // koraci 1–2 su ispravni, korak 3 još nije popunjen
     });
 
     it('ignores values of the wrong type in a draft', function () {
@@ -251,16 +251,17 @@ describe('anti-spam', function () {
     });
 
     it('verifies the captcha when it is enabled', function () {
-        config(['brzisajt.antispam.captcha' => 'yandex', 'brzisajt.antispam.yandex.server_key' => 'secret']);
-        Http::fake(['smartcaptcha.yandexcloud.net/*' => Http::sequence()
-            ->push(['status' => 'failed'])
-            ->push(['status' => 'ok'])]);
+        config(['brzisajt.antispam.captcha' => 'turnstile', 'brzisajt.antispam.turnstile.secret_key' => 'secret']);
+        Http::fake(['challenges.cloudflare.com/*' => Http::sequence()
+            ->push(['success' => false])
+            ->push(['success' => true])]);
 
         filledConfigurator()->set('captchaToken', 'bad')->call('submit')->assertHasErrors('submit');
         expect(Order::count())->toBe(0);
 
         filledConfigurator()->set('captchaToken', 'token')->call('submit')->assertHasNoErrors();
 
-        Http::assertSent(fn ($request) => $request['secret'] === 'secret' && $request['token'] === 'token');
+        Http::assertSent(fn ($request) => $request->url() === 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+            && $request['secret'] === 'secret' && $request['response'] === 'token');
     });
 });
